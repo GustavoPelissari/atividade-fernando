@@ -8,14 +8,22 @@ on:
 jobs:
   deploy:
     runs-on: self-hosted  # Roda na própria VM!
-    
+
     steps:
-    - name: Checkout do código
-      uses: actions/checkout@v3
-    
-    - name: Atualizar site
-      run: |
-        cd /var/www/html/atividade-fernando
-        sudo git pull origin main
-        sudo systemctl restart nginx
-        echo "Deploy realizado com sucesso em $(date)"
+      - name: Checkout do código
+        uses: actions/checkout@v3
+
+      - name: Atualizar site
+        run: |
+          if [ ! -d "/var/www/html/atividade-fernando/.git" ]; then
+            echo "🔁 Repositório ainda não existe, clonando..."
+            sudo rm -rf /var/www/html/atividade-fernando
+            sudo git clone https://github.com/GustavoPelissari/atividade-fernando.git /var/www/html/atividade-fernando
+          else
+            echo "📦 Atualizando código existente..."
+            cd /var/www/html/atividade-fernando
+            sudo git pull origin main
+          fi
+
+          sudo systemctl restart nginx
+          echo "✅ Deploy realizado com sucesso em $(date)"
